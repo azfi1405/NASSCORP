@@ -1,0 +1,596 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package Pesanan;
+import Barang.DatabaseConnection;
+import Dashboard.*;
+import Laporan.RiwayatTransaksi;
+import Login.*;
+import static java.nio.file.Files.lines;
+import static java.nio.file.Files.lines;
+import java.sql.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author Lenovo
+ */
+public class FormPesanan extends javax.swing.JFrame {
+
+    /**
+     * Creates new form Trans
+     */
+    public FormPesanan() {
+        initComponents();
+        tampilkanDataStok();
+        setLocationRelativeTo(null);
+        jTextField3.setEditable(false);
+        jTextField4.setEditable(false);
+        jTextField6.setEditable(false);
+        jTextField1.setEditable(false);
+        setSize(1366, 768); // Atur ukuran manual
+        setLocationRelativeTo(null); // Pusat layar
+        setVisible(true); // Penting kalau di luar main()
+        
+    }
+    
+    private void tampilkanDataStok() {
+    try {
+        Connection conn = Login.DatabaseConnection.connect();
+        String sql = "SELECT kode_barang, nama_barang, kategori, satuan, harga_beli, harga_jual, stok FROM stok_barang";
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Kode Barang");
+        model.addColumn("Nama Barang");
+        model.addColumn("Katagori");
+        model.addColumn("Satuan");
+        model.addColumn("Harga Beli");
+        model.addColumn("Harga Jual");
+        model.addColumn("Stok");
+      
+
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("kode_barang"),
+                rs.getString("nama_barang"),
+                rs.getString("kategori"),
+                rs.getString("satuan"),
+                rs.getInt("harga_beli"),
+                rs.getInt("harga_jual"),
+                rs.getInt("stok"),
+               
+            });
+        }
+
+        jTable1.setModel(model);
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    }
+}
+    private void clearForm(){
+        jTextField1.setText("");
+        jTextField2.setText("");
+        jTextField3.setText("");
+        jTextField4.setText("");
+        jTextField5.setText("");
+        jTextField6.setText("");
+        jTextField7.setText("");
+    }
+
+    private void simpanDariTextArea() {
+    try (Connection conn = DatabaseConnection.connect()) {
+        String isiTextArea = jTextArea1.getText();
+        String[] barisPesanan = isiTextArea.split("\n");
+
+        for (String baris : barisPesanan) {
+            if (!baris.contains("|")) continue;
+
+// Lewati baris kosong
+
+            // Parsing data pakai split
+            String[] bagian = baris.split("\\|");
+
+            String kode = bagian[0].split(":")[1].trim();
+            String nama = bagian[1].split(":")[1].trim();
+            int jumlah = Integer.parseInt(bagian[2].split(":")[1].trim());
+            String totalStr = bagian[3].split(":")[1].replace("Rp", "").trim();
+            double total = Double.parseDouble(totalStr);
+            String metodePembayaran = jComboBox1.getSelectedItem().toString();
+
+
+            // Cari harga jual dari total/jumlah
+            double harga = total / jumlah;
+
+            // Simpan ke transaksi_penjualan
+            String sql = "INSERT INTO transaksi_penjualan (kode_barang, nama_barang, harga_jual, jumlah, total, metode_pembayaran) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, kode);
+            ps.setString(2, nama);
+            ps.setDouble(3, harga);
+            ps.setInt(4, jumlah);
+            ps.setDouble(5, total);
+            ps.setString(6, metodePembayaran);
+
+            ps.executeUpdate();
+
+            // Update stok
+            String update = "UPDATE stok_barang SET stok = stok - ? WHERE kode_barang = ?";
+            PreparedStatement ps2 = conn.prepareStatement(update);
+            ps2.setInt(1, jumlah);
+            ps2.setString(2, kode);
+            ps2.executeUpdate();
+        }
+
+        JOptionPane.showMessageDialog(this, "Semua pesanan disimpan.");
+        tampilkanDataStok();
+        clearForm();
+        jTextArea1.setText(""); // Kosongkan area setelah simpan
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Gagal simpan dari area teks: " + e.getMessage());
+    }
+}
+
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jButton4 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jTextField3 = new javax.swing.JTextField();
+        jTextField4 = new javax.swing.JTextField();
+        jTextField5 = new javax.swing.JTextField();
+        jTextField6 = new javax.swing.JTextField();
+        jTextField7 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jButton7 = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
+        jButton3 = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+
+        jButton4.setText("jButton4");
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(null);
+
+        jLabel1.setText("KODE BARANG");
+        getContentPane().add(jLabel1);
+        jLabel1.setBounds(20, 80, 140, 26);
+        getContentPane().add(jTextField1);
+        jTextField1.setBounds(170, 80, 270, 32);
+
+        jLabel2.setText("NAMA BARANG");
+        getContentPane().add(jLabel2);
+        jLabel2.setBounds(20, 130, 150, 26);
+        getContentPane().add(jTextField2);
+        jTextField2.setBounds(170, 130, 270, 32);
+
+        jLabel3.setText("HARGA JUAL");
+        getContentPane().add(jLabel3);
+        jLabel3.setBounds(20, 180, 140, 26);
+
+        jLabel4.setText("STOK");
+        getContentPane().add(jLabel4);
+        jLabel4.setBounds(20, 230, 51, 26);
+
+        jLabel5.setText("JUMLAH BELI");
+        getContentPane().add(jLabel5);
+        jLabel5.setBounds(20, 280, 126, 40);
+
+        jLabel6.setText("HARGA TOTAL");
+        getContentPane().add(jLabel6);
+        jLabel6.setBounds(20, 330, 136, 26);
+
+        jLabel7.setText("SEARCH");
+        getContentPane().add(jLabel7);
+        jLabel7.setBounds(670, 80, 90, 26);
+        getContentPane().add(jTextField3);
+        jTextField3.setBounds(170, 180, 270, 32);
+        getContentPane().add(jTextField4);
+        jTextField4.setBounds(170, 230, 270, 32);
+        getContentPane().add(jTextField5);
+        jTextField5.setBounds(170, 280, 270, 32);
+        getContentPane().add(jTextField6);
+        jTextField6.setBounds(170, 330, 270, 32);
+        getContentPane().add(jTextField7);
+        jTextField7.setBounds(780, 80, 450, 32);
+
+        jButton1.setText("CEK");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton1);
+        jButton1.setBounds(450, 80, 190, 35);
+
+        jButton2.setText("HITUNG TOTAL");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton2);
+        jButton2.setBounds(450, 130, 190, 35);
+
+        jButton5.setText("DASHBOARD");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton5);
+        jButton5.setBounds(1040, 460, 190, 35);
+
+        jButton6.setText("Search");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton6);
+        jButton6.setBounds(1080, 130, 150, 35);
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        getContentPane().add(jScrollPane1);
+        jScrollPane1.setBounds(670, 180, 560, 220);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane2.setViewportView(jTextArea1);
+
+        getContentPane().add(jScrollPane2);
+        jScrollPane2.setBounds(20, 490, 450, 110);
+
+        jButton7.setText("TAMBAH");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton7);
+        jButton7.setBounds(450, 180, 190, 35);
+
+        jButton8.setText("BAYAR");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton8);
+        jButton8.setBounds(480, 490, 160, 35);
+
+        jLabel8.setText("METODE PEMBAYARAN");
+        getContentPane().add(jLabel8);
+        jLabel8.setBounds(20, 380, 240, 26);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Cash", "Qris", "Credit Card", "Debit Card", " ", " ", " " }));
+        jComboBox1.setSelectedIndex(-1);
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jComboBox1);
+        jComboBox1.setBounds(170, 380, 370, 32);
+
+        jLabel10.setFont(new java.awt.Font("Constantia", 1, 24)); // NOI18N
+        jLabel10.setText("FORM PESANAN");
+        getContentPane().add(jLabel10);
+        jLabel10.setBounds(550, 10, 220, 60);
+
+        jLabel9.setText("JUMLAH DIBAYAR");
+        getContentPane().add(jLabel9);
+        jLabel9.setBounds(20, 420, 140, 26);
+        getContentPane().add(jTextField8);
+        jTextField8.setBounds(170, 420, 270, 32);
+
+        jButton3.setText("RIWAYAT TRANSAKSI");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton3);
+        jButton3.setBounds(980, 510, 250, 35);
+
+        jLabel11.setIcon(new javax.swing.ImageIcon("C:\\Users\\Lenovo\\Downloads\\Desain tanpa judul.png")); // NOI18N
+        getContentPane().add(jLabel11);
+        jLabel11.setBounds(-3, 0, 1330, 670);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try (Connection conn = DatabaseConnection.connect()) {
+            String sql = "SELECT * FROM stok_barang WHERE nama_barang LIKE ?";
+   
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "%" + jTextField2.getText().trim() + "%");
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                jTextField3.setText(rs.getString("harga_jual"));
+                jTextField4.setText(rs.getString("stok"));
+                jTextField1.setText(rs.getString("kode_barang"));
+            } else {
+                JOptionPane.showMessageDialog(this, "Barang tidak ditemukan.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        try {
+            double harga = Double.parseDouble(jTextField3.getText());
+            int jumlah = Integer.parseInt(jTextField5.getText());
+            jTextField6.setText(String.valueOf(harga * jumlah));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Isi jumlah beli dengan benar.");
+        }
+
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+         String keyword = jTextField7.getText().trim();
+
+    try (Connection conn = DatabaseConnection.connect()) {
+        String sql = "SELECT * FROM stok_barang WHERE kode_barang LIKE ? OR nama_barang LIKE ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, "%" + keyword + "%");
+        ps.setString(2, "%" + keyword + "%");
+        ResultSet rs = ps.executeQuery();
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("ID");
+        model.addColumn("Kode");
+        model.addColumn("Nama");
+        model.addColumn("Kategori");
+        model.addColumn("Satuan");
+        model.addColumn("Harga Beli");
+        model.addColumn("Harga Jual");
+        model.addColumn("Stok");
+        
+         while (rs.next()) {
+            model.addRow(new Object[] {
+                rs.getInt("id_barang"),
+                rs.getString("kode_barang"),
+                rs.getString("nama_barang"),
+                rs.getString("kategori"),
+                rs.getString("satuan"),
+                rs.getDouble("harga_beli"),
+                rs.getDouble("harga_jual"),
+                rs.getInt("stok")
+            });
+        }
+
+        jTable1.setModel(model);
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    }
+
+
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        new Dashboard().setVisible(true);     
+        dispose();
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+        String kodeBarang = jTextField1.getText().trim();
+    String namaBarang = jTextField2.getText().trim();
+    String hargaJual = jTextField3.getText().trim();
+    String stok = jTextField4.getText().trim();
+    String jumlahBeli = jTextField5.getText().trim();
+    String hargaTotal = jTextField6.getText().trim();
+
+    // Validasi
+    if (kodeBarang.isEmpty() || namaBarang.isEmpty() || hargaJual.isEmpty() || 
+        stok.isEmpty() || jumlahBeli.isEmpty() || hargaTotal.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Lengkapi semua data sebelum menambahkan.");
+        return;
+    }
+
+    // Tambahkan ke area teks sebagai log (atau nanti bisa simpan ke list/array)
+    String dataPesanan = String.format("Kode: %s | Nama: %s | Jumlah: %s | Total: Rp %s\n",
+                                        kodeBarang, namaBarang, jumlahBeli, hargaTotal);
+    jTextArea1.append(dataPesanan);
+
+    // Bersihkan input (kecuali stok dan harga jual jika masih pakai)
+    jTextField1.setText("");
+    jTextField2.setText("");
+    jTextField3.setText("");
+    jTextField4.setText("");
+    jTextField5.setText("");
+    jTextField6.setText("");
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+    try {
+    if (jTextArea1.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Tidak ada pesanan untuk dibayar.");
+        return;
+    }
+String metodePembayaran = jComboBox1.getSelectedItem().toString();
+
+    
+
+    // Kalau bukan QRIS, maka harus input uang secara manual
+    if (!metodePembayaran.equalsIgnoreCase("Qris")) {
+        try {
+            int uang = Integer.parseInt(jTextField8.getText().trim().replaceAll("[^0-9]", ""));
+        } catch (NumberFormatException e) {
+            jTextArea1.setText("Masukkan uang yang valid!");
+            return;
+        }
+    }
+    int uang = Integer.parseInt(jTextField8.getText().trim().replaceAll("[^0-9]", ""));
+    String[] baris = jTextArea1.getText().split("\n");
+
+    int total = 0;
+    Pattern p = Pattern.compile("Total: Rp\\s*([0-9]+(\\.[0-9]+)?)");
+
+    for (String b : baris) {
+        Matcher m = p.matcher(b);
+        if (m.find()) {
+            double nilai = Double.parseDouble(m.group(1));
+            total += (int) nilai;
+        }
+    }
+   
+
+    int kembalian = uang - total;
+
+    String struk = "===== STRUK PEMBELIAN =====\n"
+                 + jTextArea1.getText() + "\n"
+                 + "Total Harga : Rp." + total + "\n"
+                 + "Uang Anda   : Rp." + uang + "\n";
+
+    if (kembalian > 0) {
+        struk += "Kembalian   : Rp." + kembalian + "\n";
+    } else if (kembalian == 0) {
+        struk += "Uang pas. Terima kasih!\n";
+    } else {
+        struk += "Uang kurang : Rp." + Math.abs(kembalian) + "\n";
+    }
+
+    struk += "============================";
+
+    jTextArea1.setText(struk);
+    simpanDariTextArea();
+
+} catch (NumberFormatException e) {
+    jTextArea1.setText("Masukkan uang yang valid!");
+}
+
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    new RiwayatTransaksi().setVisible(true);     
+        dispose();    // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(FormPesanan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(FormPesanan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(FormPesanan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(FormPesanan.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new FormPesanan().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
+    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jTextField6;
+    private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
+    // End of variables declaration//GEN-END:variables
+}
